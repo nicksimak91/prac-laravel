@@ -4,22 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Http\Requests\UserPostGeneratedRequest;
+use App\Http\Requests\UserValidationGeneratorRequest;
 
 class UsersController extends Controller
 {
 
-    public function register(UserPostGeneratedRequest $request)
+    public function register(UserValidationGeneratorRequest $request)
     {
 
-        $validate = $request->validated();
-        $user = new User($validate);
+        $validation = $request->validated();
+        $user = new User($validation);
 
-        if($user->save()){
+        if ($user->save()) {
 
-            return $user->getData($user);
+            return $user->getApiResponseBody($user);
         }
-        
     }
 
     public function login(Request $request)
@@ -29,54 +28,31 @@ class UsersController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if($user->password === $password){
+        if ($user->password === $password) {
             $token = $user->generateAndSaveToken();
 
-                $data = [
-                    'data' => [
-                        'api_token' => $token,
-                        'email' => $user->email,
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'surname' => $user->surname,
-                    ]
-                ];
-    
-                return response($data, 201);
+            $data = [
+                'data' => [
+                    'api_token' => $token,
+                    'email' => $user->email,
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'surname' => $user->surname,
+                ]
+            ];
+
+            return response($data, 201);
         }
     }
 
-    public function update(UserPostGeneratedRequest $request)
+    public function update(UserValidationGeneratorRequest $request)
     {
-        
+
         $token = $request->bearerToken();
-        $user = User::where('remember_token', $token)->first();
+        $validation = $request->validated();
+        $user = new User();
+        $data = $user->userUpdate($token, $validation);
 
-        $validate = $request->validated();
-
-        $user->name = $validate['name'];
-        $user->password = $validate['password'];
-        $user->surname = $validate['surname'];
-
-        $token = $user->generateAndSaveToken();
-
-        $data = [
-            'data' => [
-                'api_token' => $token,
-                'email' => $user->email,
-                'id' => $user->id,
-                'name' => $user->name,
-                'surname' => $user->surname,
-            ]
-        ];            
-        
-        return $data;
+        return response($data);
     }
-
-    public function profile()
-    {
-        return 'Страница пользователя';
-    }
-
 }
-

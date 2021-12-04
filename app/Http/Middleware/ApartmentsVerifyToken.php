@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use App\Models\User;
 
-class AuthVerifyToken
+class ApartmentsVerifyToken
 {
     const EROR = [
         'eroros' => [
@@ -17,7 +17,7 @@ class AuthVerifyToken
     public function handle(Request $request, Closure $next)
     {
         $token = $request->bearerToken();
-        $user = User::where('remember_token', $token)->first();
+        $user = $request->setUserResolver(fn () => User::where('api_token', $token)->first());
 
         if (!$user) {
             return response(self::EROR, 401);

@@ -13,28 +13,18 @@ class ApartmentsController extends Controller
 
         $token = $request->bearerToken();
         $user = User::where('remember_token', $token)->first();
-
         $request['user_id'] = $user->id;
         $apartment = new Apartment($request->all());
 
-        if($apartment->save()){
-            $data = [
-                'data' => [
-                'address' => $apartment->address,                                  
-                'city' => $apartment->city,
-                'id' => $apartment->id,
-                'meters' => $apartment->meters,
-                'metro' => $apartment->metro,
-                'price' => $apartment->price,
-                'rooms' => $apartment->rooms,
-                ],
-            ];
+        if ($apartment->save()) {
+
+            $data = $apartment->SaveDataApartment($apartment);
 
             return response($data, 201);
-        }        
+        }
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         $apartment = Apartment::find($id)->delete();
         return response($apartment, 204);
@@ -42,9 +32,7 @@ class ApartmentsController extends Controller
 
     public function get($id)
     {
-        
         return ['data' => Apartment::with('images')->find($id)];
-       
     }
 
     public function patch(Request $request, $id)
@@ -53,12 +41,10 @@ class ApartmentsController extends Controller
         $apartment->update($request->all());
 
         return ['data' => $apartment];
-        
     }
 
     public function all(Request $request)
-    {   
-        $priceFrom = 0;
+    {
         $priceFrom = $request->price['from'];
         $priceTo = $request->price['to'];
 
@@ -75,8 +61,27 @@ class ApartmentsController extends Controller
                 ->where('price', '<', $priceTo)
                 ->get(),
         ];
-    
+
         return $response;
     }
 
+    public function ApartmentsOnUserPage(Request $request)
+    {
+        $token = $request->bearerToken();
+        $user = User::where('remember_token', $token)->first();
+        $apartments = Apartment::where('user_id', $user->id)->get();
+
+        $response = [
+            'meta' => [
+                'page' => 1,
+                'totalPages' => 1,
+                'nextPage' => null,
+                'prevPage' => null,
+            ],
+
+            'data' => $apartments,
+        ];
+
+        return $response;
+    }
 }

@@ -44,7 +44,7 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
-       
+
     ];
 
     /**
@@ -65,5 +65,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'verifyToken' => \App\Http\Middleware\AuthVerifyToken::class,
+        'verifyTokenCreateApartments' => \App\Http\Middleware\ApartmentsVerifyToken::class,
     ];
 }

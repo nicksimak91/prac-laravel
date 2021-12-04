@@ -31,5 +31,20 @@ class Apartment extends Model
         return $this->hasMany(Image::class);
     }
 
+    public function SaveDataApartment($apartment)
+    {
+        $data = [
+            'data' => [
+                'address' => $apartment->address,
+                'city' => $apartment->city,
+                'id' => $apartment->id,
+                'meters' => $apartment->meters,
+                'metro' => $apartment->metro,
+                'price' => $apartment->price,
+                'rooms' => $apartment->rooms,
+            ],
+        ];
 
+        return $data;
+    }
 }

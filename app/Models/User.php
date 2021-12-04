@@ -40,7 +40,7 @@ class User extends Authenticatable
         return $this->remember_token;
     }
 
-    public function getData($user)
+    public function getApiResponseBody($user)
     {
         $token = $this->generateAndSaveToken();
 
@@ -54,13 +54,35 @@ class User extends Authenticatable
             ]
         ];
 
-        return response($data, 201);
+        return $data;
     }
 
     public function setPasswordAttribute($value)
-    
+
     {
         $this->attributes['password'] = Hash::make($value);
     }
 
+    public function userUpdate($token, $validation)
+    {
+
+        $user = User::where('remember_token', $token)->first();
+        $user->name = $validation['name'];
+        $user->password = $validation['password'];
+        $user->surname = $validation['surname'];
+
+        $token = $user->generateAndSaveToken();
+
+        $data = [
+            'data' => [
+                'api_token' => $token,
+                'email' => $user->email,
+                'id' => $user->id,
+                'name' => $user->name,
+                'surname' => $user->surname,
+            ]
+        ];
+
+        return $data;
+    }
 }
